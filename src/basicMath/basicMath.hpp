@@ -1,7 +1,9 @@
 #ifndef TEMPLATEFUN_BASIC_MATH_HPP
 #define TEMPLATEFUN_BASIC_MATH_HPP
 
-constexpr double PRECISION = 100000;
+#include <iostream>
+
+constexpr double PRECISION = 1000;
  
 template <class T>
 constexpr T plusOp(const T n1, const T n2)
@@ -32,16 +34,17 @@ constexpr int getDec(const double val)
 constexpr double toDouble(const int base, const int dec)
 { return static_cast<double>(base) + (static_cast<double>(dec) / PRECISION); }
 
-//constexpr int getDec(const double val)
-
 template <int baseT, int decT>
 struct Double
 {
-    static constexpr double val = toDouble(baseT, decT);
+    static constexpr double getVal()
+    { return toDouble(baseT, decT); }
+
+    static std::ostream& print(std::ostream& out) {
+        return out << getVal();
+    }
 };
 
-
-//template <size_t, size_t
 
 //This method of applying constexpr is not necessary now, but may be useful for mapping functions to lists?
 template<int n1, constexpr int(*F)(const int,const int), int n2>
@@ -60,6 +63,14 @@ struct VarList<T,args...>
 {
 	static T head;
 	static VarList<args...> tail;
+
+    static std::ostream& print(std::ostream& out) {
+        out << "(";
+        T::print(out);
+        out << ", ";
+        VarList<args...>::print(out);
+        return out << ")";
+    }
 };  
 
 template<typename T>
@@ -67,6 +78,11 @@ struct VarList<T>
 {
 	static T head;
 	static End tail;
+
+    static std::ostream& print(std::ostream& out) {
+        T::print(out);
+        return out;
+    }
 };
 
  

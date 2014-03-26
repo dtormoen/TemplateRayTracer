@@ -15,10 +15,15 @@ int main(int argc, char const *argv[])
 
     cout << "Floating point type: " << endl;
     constexpr double test = 1.23456789;
-    cout << "1.23456789 " << Double<getBase(test), getDec(test)>::val << endl;
+    cout << "1.23456789 " << Double<getBase(test), getDec(test)>::getVal() << endl;
 
 	cout << "Lists: " << endl;
 //	VarList<1,2,3,4,5> list;
+    VarList<Double<1,0>,Double<2,0>,Double<3,0>,Double<4,0>>::print(cout);
+    typedef VarList<Double<1,0>,Double<2,0>,Double<3,0>,Double<4,0>> d1;
+    cout << endl;
+    VarList<d1,d1,d1,d1>::print(cout);
+
 
 	return 0;
 }
