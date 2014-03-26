@@ -11,3 +11,8 @@
 *.lai
 *.la
 *.a
+
+# Annoying files on my computer
+*.user
+.DS_Store
+*.autosave

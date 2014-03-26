@@ -13,8 +13,12 @@ int main(int argc, char const *argv[])
 	cout << "Constexpr as template parameter: (2+(3*3))=" << Op<2,plusOp,multOp(3,3)>::eq << endl;
 	cout << "Op as template parameter: (2+(3*3))=" << Op<2,plusOp,Op<3,multOp,3>::eq>::eq << endl;
 
+    cout << "Floating point type: " << endl;
+    constexpr double test = 1.23456789;
+    cout << "1.23456789 " << Double<getBase(test), getDec(test)>::val << endl;
+
 	cout << "Lists: " << endl;
-	
+//	VarList<1,2,3,4,5> list;
 
 	return 0;
 }
