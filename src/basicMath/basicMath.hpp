@@ -45,6 +45,82 @@ struct Double
     }
 };
 
+template <typename xT, typename yT, typename zT>
+struct Point
+{
+    static xT x;
+    static yT y;
+    static zT z;
+};
+
+template <typename p1T, typename p2T, constexpr double(*F)(const double,const double)>
+struct VecVecOp
+{
+private:
+    static constexpr double x = F(p1T::x::getVal(), p2T::x::getVal());
+    static constexpr double y = F(p1T::y::getVal(), p2T::y::getVal());
+    static constexpr double z = F(p1T::z::getVal(), p2T::z::getVal());
+public:
+    static Point<
+        Double<getBase(x),getDec(x)>,
+        Double<getBase(y),getDec(y)>,
+        Double<getBase(z),getDec(z)> > ret;
+};
+
+template <typename p1T, typename s1T, constexpr double(*F)(const double,const double)>
+struct VecScaOp
+{
+private:
+    static constexpr double x = F(p1T::x::getVal(), s1T::getVal());
+    static constexpr double y = F(p1T::y::getVal(), s1T::getVal());
+    static constexpr double z = F(p1T::z::getVal(), s1T::getVal());
+public:
+    static Point<
+        Double<getBase(x),getDec(x)>,
+        Double<getBase(y),getDec(y)>,
+        Double<getBase(z),getDec(z)> > ret;
+};
+
+template <typename p1T, typename p2T>
+struct dotOp
+{
+    typedef VecVecOp<p1T, p2T, multOp> temp;
+    static constexpr double result = temp::x::getVal() + temp::y::getVal() + temp::z::getVal();
+    typedef Double<getBase(result), getDec(result)> ret;
+};
+
+template <typename startT, typename pointT>
+struct Ray
+{
+    typedef startT start;
+    typedef VecVecOp<pointT, startT, minusOp>::ret dir;
+};
+
+template <typename locT, typename radiusT, typename colorT>
+struct Sphere
+{
+    typedef locT loc;
+    typedef radiusT radius;
+    static colorT color;
+};
+
+template <int R, int G, int B>
+struct Color
+{
+
+};
+
+template <typename rayT, typename sphereT>
+struct IsHit
+{
+private:
+    typedef VecVecOp<rayT::start,sphereT::loc> temp;
+    static constexpr double a = dotOp<rayT::dir, rayT::dir>::ret;
+    static constexpr double b = 2 * dotOp<rayT::start, temp>::ret;
+    static constexpr double c = dotOp<temp, temp>::ret - radius::getVal();
+public:
+};
+
 
 //This method of applying constexpr is not necessary now, but may be useful for mapping functions to lists?
 template<int n1, constexpr int(*F)(const int,const int), int n2>
