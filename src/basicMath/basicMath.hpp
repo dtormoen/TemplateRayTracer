@@ -34,6 +34,17 @@ constexpr int getDec(const double val)
 constexpr double toDouble(const int base, const int dec)
 { return static_cast<double>(base) + (static_cast<double>(dec) / PRECISION); }
 
+template <class T>
+constexpr T conAbs(const T x)
+{ return x >= 0 ? x : x * -1.0; }
+
+constexpr double conSqrtHelper(const double x, const double g)
+{ return conAbs((x/g) - g) < 1/PRECISION ? g : conSqrtHelper(x,(g + (x/g))/2.0); }
+
+constexpr double conSqrt(const double x)
+{ return conSqrtHelper(x,1.0); }
+
+
 template <int baseT, int decT>
 struct Double
 {
@@ -48,9 +59,9 @@ struct Double
 template <typename xT, typename yT, typename zT>
 struct Point
 {
-    static xT x;
-    static yT y;
-    static zT z;
+    typedef xT x;
+    typedef yT y;
+    typedef zT z;
 };
 
 template <typename p1T, typename p2T, constexpr double(*F)(const double,const double)>
@@ -61,7 +72,7 @@ private:
     static constexpr double y = F(p1T::y::getVal(), p2T::y::getVal());
     static constexpr double z = F(p1T::z::getVal(), p2T::z::getVal());
 public:
-    static Point<
+    typedef Point<
         Double<getBase(x),getDec(x)>,
         Double<getBase(y),getDec(y)>,
         Double<getBase(z),getDec(z)> > ret;
@@ -85,7 +96,7 @@ template <typename p1T, typename p2T>
 struct dotOp
 {
     typedef VecVecOp<p1T, p2T, multOp> temp;
-    static constexpr double result = temp::x::getVal() + temp::y::getVal() + temp::z::getVal();
+    static constexpr double result = temp::ret::x::getVal() + temp::ret::y::getVal() + temp::ret::z::getVal();
     typedef Double<getBase(result), getDec(result)> ret;
 };
 
@@ -93,7 +104,7 @@ template <typename startT, typename pointT>
 struct Ray
 {
     typedef startT start;
-    typedef VecVecOp<pointT, startT, minusOp>::ret dir;
+    typedef typename VecVecOp<pointT, startT, minusOp>::ret dir;
 };
 
 template <typename locT, typename radiusT, typename colorT>
@@ -101,7 +112,7 @@ struct Sphere
 {
     typedef locT loc;
     typedef radiusT radius;
-    static colorT color;
+    typedef colorT color;
 };
 
 template <int R, int G, int B>
@@ -113,12 +124,13 @@ struct Color
 template <typename rayT, typename sphereT>
 struct IsHit
 {
-private:
-    typedef VecVecOp<rayT::start,sphereT::loc> temp;
-    static constexpr double a = dotOp<rayT::dir, rayT::dir>::ret;
-    static constexpr double b = 2 * dotOp<rayT::start, temp>::ret;
-    static constexpr double c = dotOp<temp, temp>::ret - radius::getVal();
 public:
+    typedef typename VecVecOp<typename rayT::start, typename sphereT::loc, minusOp>::ret temp;
+    static constexpr double a = dotOp<typename rayT::dir, typename rayT::dir>::ret::getVal();
+    static constexpr double b = 2 * dotOp<typename rayT::dir, temp>::ret::getVal();
+    static constexpr double c = dotOp<temp, temp>::ret::getVal() - sphereT::radius::getVal()*sphereT::radius::getVal();
+    static constexpr double disc = b*b - c;
+    static constexpr bool hit = disc > 0; // ignore case when disc == 0 (edge of sphere)
 };
 
 
